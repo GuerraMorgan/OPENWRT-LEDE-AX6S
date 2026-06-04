@@ -1,128 +1,103 @@
 # ==============================================================================
-# Target & Kernel (MTK7622 顶配编译器压榨与现代内核级内存优化)
+# 核心架构与目标硬件定义 (Target & Device Specifications)
 # ==============================================================================
 CONFIG_TARGET_mediatek=y
 CONFIG_TARGET_mediatek_mt7622=y
 CONFIG_TARGET_mediatek_mt7622_DEVICE_xiaomi_redmi-router-ax6s=y
-CONFIG_LINUX_6_12=y
-CONFIG_EXPERIMENTAL=y
+CONFIG_LINUX_6_18=y
 
-# 现代化 FIT Image 引导格式与内存恢复流激活 (.itb 核心激活)
-CONFIG_TARGET_ROOTFS_INITRAMFS=y
-CONFIG_TARGET_INITRAMFS_COMPRESSION_LZMA=y
-CONFIG_USES_FIT_IMAGE=y
+# ==============================================================================
+# 工具链与激进微架构编译优化 (Toolchain & Vectorization Optimizations)
+# ==============================================================================
+CONFIG_TARGET_OPTIMIZATION="-O3 -pipe -march=armv8-a+crc -mtune=cortex-a53 -ffast-math -fno-caller-saves -flto=auto"
+CONFIG_USE_STRIP=y
+CONFIG_USE_SSTRIP=y
+CONFIG_STRIP_KERNEL_EXPORTS=y
+# CONFIG_DEBUG is not set
+# CONFIG_KERNEL_DEBUG_FS is not set
+# CONFIG_KERNEL_DEBUG_INFO is not set
 
-# 【极限微调】指定 A53 专属双发射流水线排程，榨干双核 A53 每一周期算力
-CONFIG_TARGET_OPTIMIZATION="-O3 -pipe -march=armv8-a+crypto+crc -mtune=cortex-a53"
-CONFIG_USE_LTO=y
-
-# 【重磅引入】激活 6.12 内核 MGLRU 机制，完美压制 Sing-Box 规则集导致的内存页扫描延迟
+# ==============================================================================
+# Linux 内核 6.18 核心级压榨 (Kernel Subsystem & Memory Tuning)
+# ==============================================================================
+CONFIG_KERNEL_TCP_CONG_BBR=y
+CONFIG_KERNEL_DEFAULT_TCP_CONG="bbr"
 CONFIG_KERNEL_LRU_GEN=y
 CONFIG_KERNEL_LRU_GEN_ENABLED=y
+CONFIG_KERNEL_CPU_FREQ_GOV_PERFORMANCE=y
+CONFIG_KERNEL_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y
+CONFIG_KERNEL_HZ_100=y
+CONFIG_KERNEL_PREEMPT_NONE=y
+# CONFIG_KERNEL_SCHED_AUTOGROUP is not set
+CONFIG_KERNEL_DEVTMPFS=y
 
-# 彻底激活 MT7622 硬件潜能 (网络 PPE 硬件流控 + 芯片级安全加密外挂 + BBR 拥塞控制)
-CONFIG_PACKAGE_kmod-mt7622-hwnat=y
+# ==============================================================================
+# 下一代纯净网络转发栈 (Modern Networking & Hardware Acceleration)
+# ==============================================================================
+# 彻底终结 iptables 时代
+# CONFIG_PACKAGE_firewall is not set
+# CONFIG_PACKAGE_iptables is not set
+# CONFIG_PACKAGE_kmod-iptables is not set
+# CONFIG_PACKAGE_kmod-ipt-core is not set
+# CONFIG_PACKAGE_kmod-ip6tables is not set
+# CONFIG_PACKAGE_kmod-ebtables is not set
+
+# 激活纯粹的 nftables / firewall4
+CONFIG_PACKAGE_firewall4=y
+CONFIG_PACKAGE_kmod-nft-core=y
+CONFIG_PACKAGE_kmod-nft-fib=y
+CONFIG_PACKAGE_kmod-nft-nat=y
 CONFIG_PACKAGE_kmod-nft-offload=y
-CONFIG_PACKAGE_kmod-crypto-hw-safexcel=y
-CONFIG_PACKAGE_kmod-tcp-bbr=y
-# CONFIG_PACKAGE_kmod-ipt-offload is not set (坚决斩断旧时代 iptables 符号引入)
+
+# 零 CPU 占用的全硬核加速引擎
+CONFIG_NET_FLOW_OFFLOAD=y
+CONFIG_NET_FLOW_OFFLOAD_HARDWARE=y
+CONFIG_PACKAGE_kmod-shortcut-fe=y
+CONFIG_PACKAGE_kmod-shortcut-fe-cm=y
 
 # ==============================================================================
-# Base System & Modern Security (全系统 OpenSSL 统一化与无线协议栈瘦身)
+# Wi-Fi 6 基带纯解与硬件无线流映射 (Wireless Ethernet Dispatch & 11ax)
 # ==============================================================================
-CONFIG_PACKAGE_bash=y
-CONFIG_PACKAGE_ca-bundle=y
-CONFIG_PACKAGE_ca-certificates=y
-CONFIG_PACKAGE_curl=y
-CONFIG_PACKAGE_openssh-sftp-server=y
-CONFIG_LUCI_LANG_zh_Hans=y
-CONFIG_PACKAGE_luci-ssl-openssl=y
-# CONFIG_PACKAGE_wget-ssl is not set (有现代 curl 足够，拒绝功能内卷)
-# CONFIG_SIGNATURE_CHECK is not set
-# CONFIG_SIGNED_PACKAGES is not set
+CONFIG_NET_MEDIATEK_SOC_WED=y
+CONFIG_PACKAGE_kmod-mt7915e=y
+CONFIG_PACKAGE_kmod-mt7603=y
+CONFIG_DRIVER_11AX_SUPPORT=y
 
-# 斩断企业级 EAP/802.1x 认证冗余，完美保留家用 WPA3/漫游(802.11r)/Mesh(802.11s) 纯净无线
-CONFIG_PACKAGE_wpad-basic-openssl=y
-# CONFIG_PACKAGE_wpad-openssl is not set
-
-# ==============================================================================
-# Network Core (100% Pure nftables / Firewall4 + TProxy 完整拼图)
-# ==============================================================================
-CONFIG_PACKAGE_dnsmasq-full=y
-# CONFIG_PACKAGE_dnsmasq is not set
-CONFIG_PACKAGE_dnsmasq_full_dhcpv6=y
-
-# Dnsmasq-full 现代化底层裁剪与 UBUS 总线高频通信锁定
-CONFIG_PACKAGE_dnsmasq_full_nftset=y
-CONFIG_PACKAGE_dnsmasq_full_ubus=y
-# CONFIG_PACKAGE_dnsmasq_full_ipset is not set (纯 nftables 环境下 ipset 完全属于死代码)
-# CONFIG_PACKAGE_dnsmasq_full_tftp is not set (无物理 USB，拒绝网启服务占用内存)
-# CONFIG_PACKAGE_dnsmasq_full_auth is not set (移除非刚需的权威 DNS 模块)
-
-CONFIG_PACKAGE_ip-full=y
-CONFIG_IPV6=y
-CONFIG_KERNEL_IPV6=y
-CONFIG_PACKAGE_kmod-nft-netdev=y
-CONFIG_PACKAGE_kmod-nft-tproxy=y
-CONFIG_PACKAGE_kmod-nft-socket=y
-CONFIG_PACKAGE_kmod-tun=y
-
-# 纠偏：必须使用 mtk 专属硬件全锥形 NAT 模块，确保 UDP 穿透流量不破坏 PPE 硬件加速
-CONFIG_PACKAGE_kmod-nft-fullcone-mtk=y
-# CONFIG_PACKAGE_kmod-nft-fullcone is not set
+# 剥离过时无线的软加密负担
+CONFIG_PACKAGE_wpad-openssl=y
+# CONFIG_PACKAGE_wpad-basic-mbedtls is not set
+# CONFIG_PACKAGE_kmod-crypto-tkip is not set
+# CONFIG_PACKAGE_kmod-crypto-wep is not set
+CONFIG_PACKAGE_kmod-crypto-ccmp=y
+CONFIG_PACKAGE_kmod-crypto-cmac=y
+CONFIG_PACKAGE_kmod-crypto-gcm=y
 
 # ==============================================================================
-# Modern Proxy & DNS (PassWall + Sing-Box 核心一体化纯净流)
+# 零冗余：物理不存在设备与过时协议彻底断舍离 (Anti-Bloat Exclusion List)
 # ==============================================================================
-CONFIG_PACKAGE_luci-app-passwall=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray is not set
-# CONFIG_PACKAGE_luci-app-passwall_Simple_Obfs is not set (坚决淘汰落后混淆协议)
+# AX6S 物理无 USB 接口，拔除一切相关堆栈
+# CONFIG_PACKAGE_kmod-usb-core is not set
+# CONFIG_PACKAGE_kmod-usb-support is not set
+# CONFIG_PACKAGE_kmod-usb2 is not set
+# CONFIG_PACKAGE_kmod-usb3 is not set
+
+# 拒绝历史包袱（若需硬拨号可恢复 ppp，否则光猫桥接/DHCP下彻底抛弃）
+# CONFIG_PACKAGE_kmod-ppp is not set
+# CONFIG_PACKAGE_ppp is not set
+# CONFIG_PACKAGE_ppp-mod-pppoe is not set
+
+# 移除其余常见非必要应用层和驱动冗余
+# CONFIG_PACKAGE_luci is not set
+# CONFIG_PACKAGE_kmod-sound-core is not set
+# CONFIG_PACKAGE_etherwake is not set
 
 # ==============================================================================
-# LuCI Applications & Firewall4 纯净流
+# 基础系统骨架精简 (Minimalist Base System)
 # ==============================================================================
-CONFIG_PACKAGE_luci=y
-CONFIG_PACKAGE_luci-theme-argon-mod=y
-CONFIG_PACKAGE_luci-app-autoupdate=y
-CONFIG_PACKAGE_luci-app-ttyd=y
-CONFIG_PACKAGE_luci-app-wol=y
-
-# 【轻度轮询脚本】保留核心通知及在线控制功能
-CONFIG_PACKAGE_luci-app-onliner=y
-CONFIG_PACKAGE_luci-app-serverchan=y
-
-# UPnP 现代化 nftables 修正组合 (强制排斥 iptables 后端)
-CONFIG_PACKAGE_luci-app-upnp=y
-CONFIG_PACKAGE_miniupnpd-nftables=y
-# CONFIG_PACKAGE_miniupnpd is not set
-
-# 现代化 VPN & 内网穿透 (保留真正高效、纯净的内核态及 FullCone 穿透组件)
-CONFIG_PACKAGE_luci-app-wireguard=y
-CONFIG_PACKAGE_luci-app-natter=y
-
-# DDNS 现代化精简 (仅保留全能 Cloudflare v4 API)
-CONFIG_PACKAGE_luci-app-ddns=y
-CONFIG_PACKAGE_ddns-scripts_cloudflare.com-v4=y
-
-# ==============================================================================
-# Utilities & Command Line (物理硬件约束净化：AX6S 无物理 USB 接口)
-# ==============================================================================
-CONFIG_PACKAGE_htop=y
-CONFIG_PACKAGE_iperf3=y
-CONFIG_PACKAGE_jq=y
-# CONFIG_PACKAGE_lsblk is not set (屏蔽块设备工具)
-# CONFIG_PACKAGE_tar is not set (拒绝白占闪存，BusyBox 释出工具已足够)
-# CONFIG_PACKAGE_xz is not set
-# CONFIG_PACKAGE_xz-utils is not set
-
-# ==============================================================================
-# Legacy / Bloatware Clean (坚决清理的历史包袱)
-# ==============================================================================
-# CONFIG_PACKAGE_luci-compat is not set (维持 0 兼容层纯净度，网络协议栈性能提升 ~15%)
-# CONFIG_PACKAGE_luci-app-smartdns is not set (由 Sing-Box DNS 规则引擎完美替代)
-# CONFIG_PACKAGE_luci-app-adguardhome is not set (Go语言内存怪兽，防止 512MB 内存溢出)
-# CONFIG_PACKAGE_luci-app-eqos is not set (旧版 tc 流量控制，会严重破坏 MTK 硬件加速)
-# CONFIG_PACKAGE_luci-app-accesscontrol is not set
-# CONFIG_PACKAGE_luci-app-socat is not set
-# CONFIG_PACKAGE_luci-app-openclash is not set
+CONFIG_PACKAGE_base-files=y
+CONFIG_PACKAGE_busybox=y
+CONFIG_PACKAGE_dnsmasq=y
+CONFIG_PACKAGE_dropbear=y
+CONFIG_PACKAGE_netifd=y
+CONFIG_PACKAGE_opkg=y
+CONFIG_PACKAGE_uci=y
