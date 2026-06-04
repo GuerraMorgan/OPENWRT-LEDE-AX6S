@@ -3,7 +3,9 @@ CONFIG_TARGET_mediatek=y
 CONFIG_TARGET_mediatek_mt7622=y
 CONFIG_TARGET_mediatek_mt7622_DEVICE_xiaomi_redmi-router-ax6s=y
 CONFIG_LINUX_6_12=y
+
 CONFIG_EXPERIMENTAL=y
+# CONFIG_TARGET_ROOTFS_INITRAMFS is not set
 
 # Base System
 CONFIG_PACKAGE_bash=y
@@ -68,3 +70,10 @@ CONFIG_PACKAGE_lsblk=y
 CONFIG_PACKAGE_tar=y
 CONFIG_PACKAGE_xz=y
 CONFIG_PACKAGE_xz-utils=y
+
+#CONFIG_PACKAGE_luci-app-openclash=y
+#CONFIG_PACKAGE_kmod-inet-diag=y
+#CONFIG_PACKAGE_luci-compat=y
+#CONFIG_PACKAGE_ruby=y
+#CONFIG_PACKAGE_ruby-yaml=y
+#CONFIG_PACKAGE_unzip=y
