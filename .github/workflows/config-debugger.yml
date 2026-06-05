@@ -24,7 +24,7 @@ jobs:
     - name: Initialization environment
       run: |
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install gawk git gettext libssl-dev ncurses-dev unzip build-essential Ensure python3
+        sudo -E apt-get -qq install gawk git gettext libssl-dev ncurses-dev unzip build-essential python3
         sudo timedatectl set-timezone "Asia/Shanghai"
 
     - name: Clone source code
