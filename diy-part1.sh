@@ -15,4 +15,4 @@
 
 # Add a feed source
 
-echo 'src-git OpenClash https://github.com/vernesong/OpenClash.git' >>feeds.conf.default
+echo 'src-git openclash https://github.com/vernesong/OpenClash.git;master' >> feeds.conf.default
