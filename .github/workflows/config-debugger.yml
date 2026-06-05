@@ -1,6 +1,5 @@
 name: OpenWrt Config Debugger
 
-# 仅支持在 GitHub 页面手动点击触发
 on:
   workflow_dispatch:
 
@@ -11,7 +10,7 @@ env:
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
-  SSH_DEBUG: true # 【关键开关】设为 true 开启网页终端调试，设为 false 则直接跑完看结果
+  SSH_DEBUG: true
 
 jobs:
   debug_config:
