@@ -20,13 +20,14 @@
 #sed -i 's/OpenWrt/P3TERX-Router/g' package/base-files/files/bin/config_generate
 
 # LAN IP
-sed -i 's/192.168.1.1/192.168.17.1/g' package/base-files/files/bin/config_generate
+sed -i 's/192.168.31.1/g' package/base-files/files/bin/config_generate
+
+# Hostname
+sed -i 's/X/g' package/base-files/files/bin/config_generate
+
 # Timezone
 sed -i 's/UTC/Asia\/Shanghai/g' package/base-files/files/bin/config_generate
 sed -i 's/GMT0/CST-8/g' package/base-files/files/bin/config_generate
-# wifi
-sed -i '/set ${s}.disabled=/d' package/network/config/wifi-scripts/files/lib/wifi/mac80211.uc
-#rc.local
-sed -i '4i\rm -rf /lib/upgrade/keep.d/*\nwifi' package/base-files/files/etc/rc.local
-#fix Rust Build
+
+# Fix Rust Build
 sed -i 's/--set=llvm.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/g' feeds/packages/lang/rust/Makefile
